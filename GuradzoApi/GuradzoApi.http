@@ -1,0 +1,6 @@
+@GuradzoApi_HostAddress = http://localhost:5156
+
+GET {{GuradzoApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
