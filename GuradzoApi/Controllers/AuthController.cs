@@ -1,5 +1,6 @@
 ﻿using GuradzoApi.Models;
 using GuradzoApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GuradzoApi.Controllers
@@ -22,9 +23,12 @@ namespace GuradzoApi.Controllers
         {
             if (await _userService.ValidateUserAsync(request.UserName, request.Password))
             {
-                var accessToken = _tokenService.GenerateAccessToken(request.UserName);
+                var user = await _userService.GetUserAsync(request.UserName);
+                if (user == null) return Unauthorized();
+
+                var accessToken = await _tokenService.GenerateAccessTokenAsync(user);
                 var refreshToken = _tokenService.GenerateRefreshToken();
-                await _tokenService.SaveRefreshTokenAsync(request.UserName, refreshToken);
+                await _tokenService.SaveRefreshTokenAsync(user.Username, refreshToken);
 
                 return Ok(new LoginResponse
                 {
@@ -36,15 +40,16 @@ namespace GuradzoApi.Controllers
             return Unauthorized("Invalid credentials");
         }
 
+
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] LoginRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            if (await _userService.UserExistsAsync(request.UserName))
+            if (await _userService.UserExistsAsync(request.Username))
                 return BadRequest("User already exists");
 
             try
             {
-                await _userService.CreateUserAsync(request.UserName, request.Password);
+                await _userService.CreateUserAsync(request.Username, request.Password, request.Role);
                 return Ok("User registered successfully");
             }
             catch (Exception ex)
@@ -58,7 +63,10 @@ namespace GuradzoApi.Controllers
         {
             if (await _tokenService.ValidateRefreshTokenAsync(request.UserName, request.Password))
             {
-                var newAccessToken = _tokenService.GenerateAccessToken(request.UserName);
+                var user = await _userService.GetUserAsync(request.UserName);
+                if (user == null) return Unauthorized();
+
+                var newAccessToken = await _tokenService.GenerateAccessTokenAsync(user);
                 var newRefreshToken = _tokenService.GenerateRefreshToken();
                 await _tokenService.SaveRefreshTokenAsync(request.UserName, newRefreshToken);
 
@@ -79,6 +87,28 @@ namespace GuradzoApi.Controllers
             return result
                 ? Ok("Password updated successfully")
                 : NotFound("User not found");
+        }
+
+        [Authorize]
+        [HttpGet("profile")]
+        public IActionResult GetProfile()
+        {
+            var username = User.Identity?.Name;
+            return Ok($"Hello {username}, you are authenticated.");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin-data")]
+        public IActionResult GetAdminData()
+        {
+            return Ok("This is only accessible to Admins");
+        }
+
+        [Authorize(Roles = "User")]
+        [HttpGet("user-data")]
+        public IActionResult GetUserData()
+        {
+            return Ok("This is only accessible to Users");
         }
     }
 }

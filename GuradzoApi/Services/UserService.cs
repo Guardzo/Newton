@@ -51,5 +51,26 @@ namespace GuradzoApi.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task CreateUserAsync(string username, string password, string role = "User")
+        {
+            if (await UserExistsAsync(username)) throw new Exception("User already exists");
+
+            var user = new User
+            {
+                Username = username,
+                PasswordHash = _hasher.HashPassword(null!, password),
+                Role = role
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<User?> GetUserAsync(string username)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+        }
+
     }
 }

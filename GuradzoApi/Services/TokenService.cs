@@ -19,12 +19,13 @@ namespace GuradzoApi.Services
             _context = context;
         }
 
-        public string GenerateAccessToken(string username)
+        public async Task<string> GenerateAccessTokenAsync(User user)
         {
             var claims = new[]
             {
-            new Claim(ClaimTypes.Name, username)
-        };
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role)
+            };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
