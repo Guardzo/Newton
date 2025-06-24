@@ -1,5 +1,6 @@
 using GuradzoApi;
 using GuradzoApi.Extensions;
+using GuradzoApi.Interfaces;
 using GuradzoApi.Middlewares;
 using GuradzoApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -23,8 +24,8 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<ILoggerService, LoggerService>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()

@@ -1,4 +1,5 @@
-﻿using GuradzoApi.Models;
+﻿using GuradzoApi.Interfaces;
+using GuradzoApi.Models;
 using GuradzoApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,10 +10,10 @@ namespace GuradzoApi.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly TokenService _tokenService;
-        private readonly UserService _userService;
+        private readonly ITokenService _tokenService;
+        private readonly IUserService _userService;
 
-        public AuthController(TokenService tokenService, UserService userService)
+        public AuthController(ITokenService tokenService, IUserService userService)
         {
             _tokenService = tokenService;
             _userService = userService;

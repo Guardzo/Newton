@@ -1,10 +1,11 @@
 ﻿using GuradzoApi.Data;
+using GuradzoApi.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GuradzoApi.Services
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly GuradoDbContext _context;
         private readonly PasswordHasher<User> _hasher = new();

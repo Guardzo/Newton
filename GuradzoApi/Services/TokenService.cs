@@ -1,4 +1,5 @@
 ﻿using GuradzoApi.Data;
+using GuradzoApi.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -8,7 +9,7 @@ using System.Text;
 
 namespace GuradzoApi.Services
 {
-    public class TokenService
+    public class TokenService : ITokenService
     {
         private readonly IConfiguration _config;
         private readonly GuradoDbContext _context;
