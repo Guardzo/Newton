@@ -3,6 +3,8 @@ using GuradzoApi.Extensions;
 using GuradzoApi.Middlewares;
 using GuradzoApi.Services;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,8 +22,20 @@ builder.Services.AddDbContext<GuradoDbContext>(options =>
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddAuthorization();
+builder.Services.AddSingleton<ILoggerService, LoggerService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<TokenService>();
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning) // Suppress SQL logs
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/app.log", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 

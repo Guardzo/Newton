@@ -1,4 +1,5 @@
 ﻿using GuradzoApi.Models;
+using GuradzoApi.Services;
 using System.Net;
 using System.Text.Json;
 
@@ -7,13 +8,13 @@ namespace GuradzoApi.Middlewares
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly ILoggerService _customLogger;
         private readonly IHostEnvironment _env;
 
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
+        public ExceptionMiddleware(RequestDelegate next, ILoggerService customLogger, IHostEnvironment env)
         {
             _next = next;
-            _logger = logger;
+            _customLogger = customLogger;
             _env = env;
         }
 
@@ -25,7 +26,7 @@ namespace GuradzoApi.Middlewares
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An unhandled exception occurred: {ex.Message}");
+                _customLogger.LogError("Unhandled exception occurred", ex);
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 

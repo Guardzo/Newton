@@ -8,14 +8,17 @@ namespace GuradzoApi.Services
     {
         private readonly GuradoDbContext _context;
         private readonly PasswordHasher<User> _hasher = new();
+        private readonly ILoggerService _logger;
 
-        public UserService(GuradoDbContext context)
+        public UserService(GuradoDbContext context, ILoggerService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<bool> ValidateUserAsync(string username, string password)
         {
+            _logger.LogInfo($"Validating user: {username}");
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null) return false;
 
@@ -25,21 +28,8 @@ namespace GuradzoApi.Services
 
         public async Task<bool> UserExistsAsync(string username)
         {
+            _logger.LogInfo($"Check UserExists: {username}");
             return await _context.Users.AnyAsync(u => u.Username == username);
-        }
-
-        public async Task CreateUserAsync(string username, string password)
-        {
-            if (await UserExistsAsync(username)) throw new Exception("User already exists");
-
-            var user = new User
-            {
-                Username = username,
-                PasswordHash = _hasher.HashPassword(null!, password)
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> ResetPasswordAsync(string username, string newPassword)
@@ -54,6 +44,7 @@ namespace GuradzoApi.Services
 
         public async Task CreateUserAsync(string username, string password, string role = "User")
         {
+            _logger.LogInfo($"CreateUser: {username}");
             if (await UserExistsAsync(username)) throw new Exception("User already exists");
 
             var user = new User
