@@ -1,5 +1,6 @@
 using GuradzoApi;
 using GuradzoApi.Extensions;
+using GuradzoApi.Middlewares;
 using GuradzoApi.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,6 +36,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.MapControllers();
 
